@@ -1,0 +1,4 @@
+config-opts.tex
+thesis.*
+!thesis.tex
+!thesis.bib
