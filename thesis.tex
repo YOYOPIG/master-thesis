@@ -1,17 +1,17 @@
-\documentclass[PhD]{PHlab-thesis}
+\documentclass{PHlab-thesis}
 
-\addbibresource{thesis-example.bib}
+\addbibresource{thesis.bib}
 
 \newcommand*\Department中文{資訊工程學研究所}
 \newcommand*\Department英文{Institute of Computer Science and Information Engineering}
 
-\newcommand*\ThesisTitle中文{視覺化轉錄因子結合位點DNA\退{1}甲基化的新方法：MethylSeqLogo}
-\newcommand*\ThesisTitle英文{MethylSeqLogo: A Novel Method for the Vizualization of DNA Methylation at Transcription Factor Binding Sites}
-\newcommand*\ThesisNote中文{示例:其實徐翡曼是東京大學畢業的博士}% For real thesis omit, or use {初稿} etc.
-\newcommand*\ThesisNote英文{Just an example.  Fei-Man actually graduated from Tokyo Univ.}% For real thesis omit, or use {draft} etc.
+\newcommand*\ThesisTitle中文{EAGLE-GPU：使用圖形處理單元加速替代基因組可能性評估}
+\newcommand*\ThesisTitle英文{EAGLE-GPU: Acceleration of Alternative Genome Likelihood Evaluation using Graphics Processing Unit}
+%\newcommand*\ThesisNote中文{示例:其實徐翡曼是東京大學畢業的博士}% For real thesis omit, or use {初稿} etc.
+%\newcommand*\ThesisNote英文{Just an example.  Fei-Man actually graduated from Tokyo Univ.}% For real thesis omit, or use {draft} etc.
 
-\newcommand*\Student中文{徐翡曼}
-\newcommand*\Student英文{Fei-man Hsu}
+\newcommand*\Student中文{盧宥霖}
+\newcommand*\Student英文{You-Lin Lu}
 
 \newcommand*\Advisor中文{賀保羅}
 \newcommand*\Advisor英文{Paul Horton}
@@ -42,7 +42,8 @@ MethylSeqLogo...衍伸sequence logo的視覺化方法改善包括DNA甲基化的
 }
 
 \newcommand*\Acknowledgements{%
-感謝我...}
+Thank you Prof. Horton%
+}
 
 
 
@@ -70,18 +71,28 @@ MethylSeqLogo...衍伸sequence logo的視覺化方法改善包括DNA甲基化的
 
 
 \chapter{Introduction}
-DNA methylation is a major component of the epigenetic state of cells, as as such plays a critial role in the differentiation and maintenance of cell type.  Consequentially, aberrant DNA methylation plays a central role in cancer --- a manifestation of defective regulation of cell behavior.
-
+Next generation sequencing has played a significant role in bioinformatics research for the past decade, where variant calling remains to be a challenging subtask. Different methods have been proposed for this specific task, including the successor of this study, EAGLE: Explicit Alternative Genome Likelihood Evaluator~\cite{kuo2018eagle}, published in 2017 by Tony Kuo et al. 
+However, we noticed that the execution of EAGLE could take up to a decent amount of time, despite the usage of the provided multithreading option. Although the total execution time seems rather acceptible currently, we would like to further investigate potential oppurtunities of acceleration, regarding the upcoming third generation sequencing, where sequencing read lengths could easily grow up to 10,000 base pairs.
+Since sequence alignment is a highly parrallel task, it was already shown in the original EAGLE research that multithreading could effectively speedup the whole process. In order to further accelerate the program, adding more threads would be a straightforward approach. While the total amount of threads that can be ran concurrently is constrained by the hardware, it is often capped around tens to twenties for modern mainstream CPUs. This is far from enough in comparison to human genome sequences, motivating us to search for other sources of acceleration, including the usage of additional devices. 
+This is when Graphics Processing Unit(GPU), comes to our mind. Originally designed for graphics rendering, GPUs come with a lot more cores in comparison to CPUs, which is highly beneficial for data-parallel problems~\cite{navarro2014survey}. In the recent years, GPUs have been shown to greatly accelerate the process of a variety of tasks, including computer vision, deep learning, etc. Thus, we would like to investigate whether sequence alignment and variant calling, composed of several subtasks which are also highly data-parallel, can be can be accelerated with the aid of GPUs.
+Here, we present a GPU accelerated version of EAGLE. Most of the probablistic model would be rather similar to the original method, while several adjustments were made to reduce memory copy between device and host, making it a better fit to the device-host parellel computing architecture. Experiments were made by using both real data and simulated data, concluding that ...
 
 \chapter{Related Works}
-The characteristics of NuMT insertion sites have been analyzed in depth~\cite{TsujiJ_HortonP_NAR2012_Mammalian}.
-Add your related works here.
-
+In this chapter, we review recent works related in brief.
+\section{EAGLE}
+\section{NVBIO}
+\section{GASAL2}
+In this research, 
 
 \chapter{Method}
 \section{Proposed Scheme}
-Write a bunch of stuff here.
+In the original EAGLE publication, whether a hypothesis fits the sequenced read data is determined by its likelihood, often measured by its ratio against the default hypothesis: the read being sequenced from the reference genome. In order to compute the likelihood for all possible read alignments, the probabilities of all read and genome segment pair are calculated and then further summed up. Although this is undoubtly a straightforward solution, numerous time consuming operations were done in loop. Here, we unroll the loops and take advantage of the high parallel graphics processing units. Before making any adjustments to the program, we would like to first take a closer look at the probablistic model proposed in EAGLE.
 
+% Should I put the thorough probablistic model here?
+
+First of all, for any given pair of genome segment g and sequence read r, the likelihood of the read being sequenced from g is computed by product of the likelihood of all base pairs. Since the likelihood of each bp match is independant to other bp matches, they can be computed in parallel and then multiplied. This provides us the oppurtunity to accelerate this operation.
+
+Next, we take a look at the intermediate result, p(r|G). In most cases, knowing the exact genome segment g where read sequence r is sequenced from beforehands is unrealistic. Thus, we will 
 	
 \chapter{Results}
 Describe your results here.

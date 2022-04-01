@@ -1,0 +1,1 @@
+perl compile-thesis-from-scratch.pl compile-opts.tex
