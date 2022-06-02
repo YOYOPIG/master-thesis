@@ -31,13 +31,13 @@
 
 
 \newcommand*\Keywords英文{bioinformatics, genomics, string algorithms}
-\newcommand*\Abstract英文{%
+\newcommand*\Abstract英文{%TODO
 We introduce MethylSeqLogo, an extension of sequence logos to vizualize DNA methylation.
 }
 
 
 \newcommand*\Keywords中文{生命科學、基因組、字串演算法}
-\newcommand*\Abstract中文{%
+\newcommand*\Abstract中文{%TODO
 MethylSeqLogo...衍伸sequence logo的視覺化方法改善包括DNA甲基化的資訊。
 }
 
@@ -86,14 +86,17 @@ In this research,
 
 \chapter{Method}
 \section{Proposed Scheme}
-In the original EAGLE publication, whether a hypothesis fits the sequenced read data is determined by its likelihood, often measured by its ratio against the default hypothesis: the read being sequenced from the reference genome. In order to compute the likelihood for all possible read alignments, the probabilities of all read and genome segment pair are calculated and then further summed up. Although this is undoubtly a straightforward solution, numerous time consuming operations were done in loop. Here, we unroll the loops and take advantage of the high parallel graphics processing units. Before making any adjustments to the program, we would like to first take a closer look at the probablistic model proposed in EAGLE.
+In the original EAGLE publication, whether a hypothesis fits the sequenced read data is determined by its likelihood, often measured by its ratio against the default hypothesis: the read being sequenced from the reference genome. In order to compute the likelihood for all possible read alignments, the probabilities of all read and genome segment pair are calculated and then further summed up in logarithm. Although this is undoubtly a straightforward solution, numerous time consuming operations were done in loop. Here, we unroll the nested loops and take advantage of the high parallel graphics processing units. 
+Before making any adjustments to the program, we would like to first take a closer look at the probablistic model proposed in EAGLE.
 
 % Should I put the thorough probablistic model here?
 
-First of all, for any given pair of genome segment g and sequence read r, the likelihood of the read being sequenced from g is computed by product of the likelihood of all base pairs. Since the likelihood of each bp match is independant to other bp matches, they can be computed in parallel and then multiplied. This provides us the oppurtunity to accelerate this operation.
+First of all, for any given pair of genome segment g and sequence read r, the likelihood of the read being sequenced from g is computed by product of the likelihood of all base pairs. Since the likelihood of each bp match is independant to other bp matches, they can be computed concurrently. This provides us the oppurtunity to accelerate this process by computing them in parallel, where the maximum number of operations that can be done in parallel is bounded by the length of the read r. Considering NGS read data, which is often around 100 to 150 base pairs in terms of read length, we can easily load the entire read onto the GPU and allocate a thread for each base, since the size is rather small in comparison to the memory capacity and the core counts of modern GPUs.
 
-Next, we take a look at the intermediate result, p(r|G). In most cases, knowing the exact genome segment g where read sequence r is sequenced from beforehands is unrealistic. Thus, we will 
-	
+Next, we would like to further extend the degree of parallelism, seeking to utilize the performance provided by the GPU. Here, we take a closer look at the intermediate result, p(r|G). In most cases, knowing the exact genome segment g where read sequence r is sequenced from in advance is unrealistic. Thus, in the original method, for all possible genome segment g sampled from the hypothesis genome G, with the exact length with the given read r, were considered. P[r|g] are calculated iteratively, with the summation of their results being the final score of the given read. Since the total amount of segments to be considered is related to the length of read sequence(=2*lr), the execution time required grows in polynomial time with the sequence length. Apparently, the results of P[r|g] for different genome segment g is also independant, opening an oppurtunity for parallelism. In addition to the entire read r, we also loaded the selected genome G to the GPU, allocating a block of threads for each possible genome segment g. Within each block, we execute the same instructions as described in the previous section, calculating the probabilities for each site in their corresponding thread.
+
+Through the above method, we have already reduced the amount of time required to execute the program. This also allows us to revisit a term that was previously ignored: insertion/deletion errors in read sequences. Since indel errors not only modifies the sequence but also introduce shifts, it would increase the time complexity, proportional to the length of reads. With the previous implementation, where the operations were sequentially executed, this would sure intensify the computational cost and lead to longer execution time. Mainly considering generation sequencing data, which has a rather low probability of indel errors in the sequencing phase, an assumption that there was no indel sequencing errors was made, in order to avoid the problem descibed above. However, with the aid of GPUs, such operations can be done concurrently, reducing the amount of time required to compute the final result. In GPU-EAGLE implementation, a threshold value is input by the user, indicating the maximum number of indel errors to be taken into account. After all, the probability of such errors is still fairly low, making it pointless to compute all of the combinations of shifted reads and indels. Knowing the threshold beforehand, all of the possible reads having less indel errors than it is then listed out and assigned to the GPU. Similar to the base case where no indel errors was considered, we would need a block of threads for each pair of read r and genome segment g. With regard to the same read having multiple variations due to the introduced indel errors, the GPU would launch a two dimensional block instead of the original one dimensional block, with the extra dimension representing the index of read in the list of possible reads with indel. To allow such indeled read list to be long exceeding the block size launched, either because of hardware constraints or user settings, the list would be partitioned to batches with the same size as the y dimensional size of the two dimensional block. At last, the results of each batch would be added up to acquire the final reuslt.
+
 \chapter{Results}
 Describe your results here.
 
@@ -103,7 +106,7 @@ Discussion the significance or your results.
 
 
 \section{Future Work}
-
+Trying to investigate various possibilites of application for GPU to improve the performance, this paper provides the implementations of the general usage functions in CUDA. Unlike programs executed particularly on CPU, the design of GPU kernels often require extra attention, including memory copying schema and the detail implementation of algorithms. If we peurely consider datasets with shorter sequencing reads, the extent of parallelism could be further increased by computing different read sets concurrently. With a specific kernel for each case, warp divergence could be eliminated. Theoretically, this could benefit cases when the dataset consist of large amount of read sets, enormously reducing the amount of time to evaluate the likelihood by computing the results for each set all at once. Another possible optimization would be lessening the memory copying cost. Despite it not being the bottleneck of the program, some advanced techniques could be applied to lower the amount of data copied between the host CPU and the device even more. For example, if we are targeting only DNA and RNA sequences but not proteins, we could easily represent the bases, A, C, G, T(U for RNA), N, in 3 bits. Thus, instead of copying them as characters, they could be encoded first, enabling us to pack 2 bases into one unsigned integer. This is a common trick among sequencing related GPU applications, also adopted by other tools such as GASAL2 and NVBIO.
 
 \chapter{Conclusion}
 Add your conclusions here.
