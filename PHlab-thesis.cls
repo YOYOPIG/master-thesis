@@ -12,6 +12,7 @@
 \RequirePackage{type1cm}
 \geometry{verbose,a4paper,tmargin=2.3cm,bmargin=3cm,lmargin=2.5cm,rmargin=3cm}
 
+\RequirePackage{fancyhdr}
 \RequirePackage{setspace}
 \onehalfspace
 
