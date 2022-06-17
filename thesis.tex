@@ -190,14 +190,14 @@ First of all, we used the exact same variant dataset that was mentioned in the o
 	\centering
 	\includegraphics[scale=0.3]{figures/gpu_config.png}
 	\caption{Time taken for different kernel launch configuration}
-	\label{fig:gpuconfig} % \ref{this label}
+	\label{fig:gpuconfig} 
 \end{figure}
 
 \section{Simulated reads with different lengths}
 With the length of the sequenced reads growing considering third generation sequencing, we performed another experiment, with the intension to figure out the relations between parallelism and sequence length. We did not only test with sequences with around 10000 bp which is the most common length for Nanopore sequencing results, but also other varying lengths, preparing our tool in advance for possible futeure sequencing technologies. Simulated reads were generated, with different lengths, by randomly sampling from the reference genome. Similar to the previous section, we measured the speedup outcomes for every data with different kernel launch configurations, presenting the recommended settings under each circumstance.
 
 \section{Considering read indel errors}
-Attempting to find out if the consideration of indel errors is feasible, although computationally expensive, with the assistance of GPU parallel computing, we reused the NS12911 dataset, but without any assumption about the presence of read indel errors. Instead, a threshold is issued, while all of the reads with indel errors length within the threshold is considered. As mentioned in the previous study, doing so with CPU only is extremely time-consuming, thus we had to set a limitation for the threshold, not exceeding 2, in order to regulate the total execution time to a reasonable extent.
+Attempting to find out if the consideration of indel errors is feasible, although computationally expensive, with the assistance of GPU parallel computing, we reused the NS12911 dataset, but without any assumption about the presence of read indel errors. Instead, a threshold is issued, while all of the reads with indel errors length within the threshold is considered. As mentioned in the previous study, doing so with CPU only is extremely time-consuming, thus we had to set a limitation for the threshold, not exceeding 1, in order to regulate the total execution time to a reasonable extent.
 
 \chapter{Discussion}
 EAGLE-GPU is a GPU accelerated implementation of the previously published method, EAGLE, while maintaining similar data processing workflow for better integration with the previous tool. Being generalized by re-engineering the fundamental functions, without packing the entire algorithm into a hard coded GPU kernel sure helps with flexibility, preparing the tool for further applications. However, performance were sacrificed to a certain extent by doing so. In the following sections, we would like to discuss our interpretation of the experimental results, along with possible approaches to further increase the speedup.
