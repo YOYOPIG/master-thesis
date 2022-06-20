@@ -44,10 +44,8 @@ Variant calling remains to play an important role in analyzing genome sequence d
 }
 
 \newcommand*\Acknowledgements{%
-TODO: Thank you, world......
+首先我想在這裡感謝我的指導教授賀保羅老師。對於大學期間沒有涉略生物相關基礎知識的我來說，透過老師的幫忙讓我了解基因序列分析常用的技巧與困難，也才衍生出進行這份研究的動機。在討論的過程中，也很感謝老師給予的指教，讓我在面對困難時更快速的找到解決問題的方向。本論文的完成同時還要感謝原論文 EAGLE 的主要作者之一 Tony Kuo，除了和我分享當時研究時的寶貴經驗，還提供了當初實驗的測試資料，使我們在本論文中能更客觀地針對結果進行比較與分析。
 }
-
-
 
 \input{frontmatter}% 封面頁, 口委中英文簽名單, 誌謝, 中英文摘要, 論文目錄, 圖表目錄
 
@@ -155,7 +153,7 @@ As shown in Figure \ref{fig:overview}, our goal is to parallelize the parts circ
 Before all else, we should first cautiously design our workflow, trying to acclimate to the CUDA programming model. There exists several essential points to be aware of, which could affect the performance significantly because of the hardware implementations of GPUs. For modern NVIDIA GPUs that support CUDA, often comes with numerous streaming processors(SP), which are the cores on the GPU. Each of them is responsible for executing a thread in our program. They are grouped to form streaming multiprocessors(SM), the basic unit programmers control to execute our parallelized functions, also known as kernels in CUDA terminology. Streaming multiprocessors have their own set of streaming processors, along with their own hardware units such as registers, cache, shared memory, and warp scheduler that schedules warps, the basic unit when it comes to runtime execution. Each warp contains 32 threads, while they share one program counter. Thus, when threads in the same warp executes instructions conditionally, possibly through statements such as if-else, will slow down the process since those threads not executing will be temporarily deactivated, waiting for others to finish. Such problem is refferd to as warp divergence, and could result in a performance loss due to the serialized manner. Another issue that could worsen performance is memory copying. Since kernels launched on GPU, or device in CUDA terminology, cannot directly access the host memory, those data to be computed should be copied to the device beforehands. However, copying data between host and device is quite time consuming, being likely to take more time than the actual computing operations if not designed carefully. Hence, these are our main concerns during development, while seeking to keep the kernels generalized, ready for further integration. To better demonstrate how the task is designed in a parallel fashion, we briefly visualized our implementation fitting the CUDA programming host-device model in Figure \ref{fig:prop}. 
 \begin{figure}
 	\centering
-	\includegraphics[scale=0.5]{figures/proposed.png}
+	\includegraphics[scale=0.8]{figures/proposed.png}
 	\caption{Proposed workflow in host-device scheme}
 	\label{fig:prop} % \ref{this label}
 \end{figure}
