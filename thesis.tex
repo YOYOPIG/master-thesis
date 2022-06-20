@@ -65,6 +65,7 @@ TODO: Thank you, world......
 % \nomenclature[Z]{USF-1}{Upstream stimulatory factor 1}
 
 \nomenclature[A]{NGS}{Next generation sequencing}
+\nomenclature[A]{DNA}{deoxyribonucleic acid}
 \nomenclature[A]{CPU}{Central processing unit}
 \nomenclature[A]{GPU}{Graphics processing unit}
 \nomenclature[A]{EAGLE}{Explicit Alternative Genome Likelihood Evaluator, the predecessor of this research}
@@ -100,7 +101,7 @@ The high throughput strength of GPU has already been applied to the field of bio
 Numerous other applications in bioinformatics were also shown to be advantageous with GPUs. Yung et. al presented GBOOST~\cite{yung2011gboost} for gene-gene interaction, while an influential sequence analysis tool, BLAST~\cite{altschul1990basic}, were implemented with parallel computing based on GPU and achieved around 2 to 4 times speedup~\cite{vouzis2011gpu}. Several works, on the other hand, commit to providing GPU libraries with even better performance. GASAL2~\cite{ahmed2019gasal2}, for instance, is another accelerated library for sequence alignment, reported to outperform NVBIO. 
 
 \section{EAGLE}
-Critical concepts of the previous work EAGLE would be recapitulated in this section. First of all, three files would be provided as input: the called variants in a vcf format, the reference genome, and the aligned sequencing reads in a bam file format. After processing the data given, the called variants are then evaluated by their likelihood. With the given data, we could obtain the quality of called variants by examining whether the reads better support the hypothesis which they were sequenced from the reference genome, or rather being more likely to be sequenced from an alternative sequence consisting of the called variants, indicating a higher probability that the called variants are actually present. On the other hands, if the reads better suit the other hypothesis that they are not related to the called variants and were more possibly sequenced from the reference genome, we could then lower our confidence level on the called variant. Therefore, we would have to calculate the probability $P[r|G]$ regularly over all sequencing reads $r$ in a read set covering the interval with interest, while $G$ denotes the hypothetical genome sequence, either one of the reference genome $G_{ref}$ or the alternative genome, $G_{alt}$. For each iteration calculating $P[r|G]$, we can derive $P[r|G]$ as the summation of the probability having $r$ being sequenced from $g$, a certain genome segment in $G$ with the same length $\ell_r$ as the read $r$, over all possible {g\in G}. Such equation can be written as follows:
+Critical concepts of the previous work EAGLE would be recapitulated in this section. First of all, three files would be provided as input: the called variants in a vcf format, the reference genome, and the aligned sequencing reads in a bam file format. After processing the data given, the called variants are then evaluated by their likelihood. With the given data, we could obtain the quality of called variants by examining whether the reads better support the hypothesis which they were sequenced from the reference genome, or rather being more likely to be sequenced from an alternative sequence consisting of the called variants, indicating a higher probability that the called variants are actually present. On the other hands, if the reads better suit the other hypothesis that they are not related to the called variants and were more possibly sequenced from the reference genome, we could then lower our confidence level on the called variant. Therefore, we would have to calculate the probability $P[r|G]$ regularly over all sequencing reads $r$ in a read set covering the interval with interest, while $G$ denotes the hypothetical genome sequence, either one of the reference genome $G_{ref}$ or the alternative genome, $G_{alt}$. For each iteration calculating $P[r|G]$, we can derive $P[r|G]$ as the summation of the probability having $r$ being sequenced from $g$, a certain genome segment in $G$ with the same length $\ell_r$ as the read $r$, over all possible ${g\in G}$. Such equation can be written as follows:
 \begin{equation}
 P[r|G] = \sum_{g\in G} P[g|G] P[r|g]
 \end{equation}
@@ -209,7 +210,22 @@ To better compare the results with and without GPU acceleration, an experiment w
 EAGLE-GPU is compiled with CUDA version 10.1. The experiments were conducted on a machine with a single AMD Ryzen™ 9 5950X desktop processor, consisting of 16 hyper-threaded physical cores running at their base clock 3.4 gigahertz, and 128 GB of random access memory. The GPU installed on the machine is a single NVIDIA GeForce RTX™ 3090 graphics card.
 
 \section{Identical dataset: The NS12911 variants}
-First of all, we used the exact same variant dataset that was mentioned in the original EAGLE paper to inspect the performance difference between the sequential and the parallelized implementations. In search of the best grid size and block size settings for this task, we conducted a first experiment disabling the CPU's multithreading setting, measuring the time taken for all combinations of 1, 32, 64, 128, 256, threads and blocks respectively. As we can see in Figure \ref{fig:gpuconfig}, the best configuration would be using 32 blocks per grid, with each block running 32 threads. This results in the program taking 0.342212 hours to finish the task. Later on, attempting to compare the results with and without GPU acceleration, the experiment is then conducted by adopting a single threaded CPU setting, with and without GPU parallel computing under the best kernel launch configuration, gradually moving to a multithreaded setting. The results are shown in Figure \ref{fig:multithread}. For this dataset, the execution time both reduced with the amount of threads increasing, until 8 threads were used. However, we can see that with the current implementation of GPU computing, the execution time is not effectively reduced, but is somehow worsened instead.
+First of all, we used the exact same variant dataset that was mentioned in the original EAGLE paper to inspect the performance difference between the sequential and the parallelized implementations. In search of the best grid size and block size settings for this task, we conducted a first experiment disabling the CPU's multithreading setting, measuring the time taken for all combinations of 1, 32, 64, 128, 256, threads and blocks respectively. The measurements are shown in Table \ref{table:1}. As we can see in Figure \ref{fig:gpuconfig} where we visualized the results, the best configuration would be using 32 blocks per grid, with each block running 32 threads. This results in the program taking 0.342212 hours to finish the task. Later on, attempting to compare the results with and without GPU acceleration, the experiment is then conducted by adopting a single threaded CPU setting, with and without GPU parallel computing under the best kernel launch configuration, gradually moving to a multithreaded setting. The results are shown in Figure \ref{fig:multithread}. For this dataset, the execution time both reduced with the amount of threads increasing, until 8 threads were used. However, we can see that with the current implementation of GPU computing, the execution time is not effectively reduced, but is somehow worsened instead.
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{l*{5}{c}}
+		Block size              & 1 & 32 & 64 & 128 & 256\\
+		\hline
+		1 block & 0.363213 & 0.351147 & 0.350840 & 0.349051 & 0.346477  \\
+		32 blocks            & 0.364184 & 0.342212 & 0.345006 & 0.344206 & 0.344719  \\
+		64 blocks          & 0.353136 & 0.353382 & 0.347007 & 0.349023 & 0.345956  \\
+		128 blocks     & 0.354095 & 0.353936 & 0.352839 & 0.349773 & 0.349343  \\
+		256 blocks     & 0.351260 & 0.355450 & 0.359848 & 0.361534 & 0.357256  \\
+	\end{tabular}
+	\caption{Time taken (in hours) for different kernel launch configuration}
+	\label{table:1}
+\end{table}
+
 \begin{figure}
 	\centering
 	\includegraphics[scale=0.3]{figures/gpu_config.png}
