@@ -122,7 +122,7 @@ Here, since $P[r]$ is going to be cancelled later on, it will be left as is. Awa
 \begin{equation}
 P[g|r] = \prod_{i=1}^{\ell_r} P[g_i|r_i].
 \end{equation}
-where $g_i$ is the $i$th base of $g$ and $r_i$ is the probability vector over \texttt{\{a,c,g,t\}} corresponding to the base and quality score of the $i$th position of $r$. The above equations can thus further derive
+where $g_i$ denotes the $i$th base of $g$, while $r_i$ represents the probability vector for the $i$th position of $r$, with respect to the read quality score over \texttt{\{a,c,g,t\}}. The above equations can thus further derive
 \begin{equation*}
 \begin{split}
 P[r|G] =  \sum_{g\in G} P[g|G] P[r|g] &= \sum_{g\in G} \left( \mathcal{L}(\ell_g) \frac{1}{n_{\ell_g}} \right) \frac{P[r]4^{\ell_g}}{\mathcal{L}(\ell_g)} \prod_{i=1}^{\ell_g} P[g_i|r_i]  \\
