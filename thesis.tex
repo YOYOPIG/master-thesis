@@ -1,6 +1,8 @@
 \documentclass{PHlab-thesis}
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
 \addbibresource{thesis.bib}
 
 \newcommand*\Department中文{資訊工程學研究所}
@@ -145,38 +147,38 @@ It is obvious that, the above equation requires computing the summation of produ
 
 \chapter{Method}
 \section{Method Overview}
-In the original EAGLE publication, for all called variants, a hypothesis: instead of being identical to the reference genome $G_{ref}$, the individual providing the sequenced reads possesses an alternative version of human genome $G_{alt}$ consisting the called variant, is considered. It is then compared with the default hypothesis: the read being sequenced from the reference genome. In order to assess how well the above two hypotheses fits the sequenced read data $r$, the likelihood, $P[r|G]$, for both $G_{ref}$ and $G_{alt}$ is measured. The ratio between the two would be obtained as the resulting quality score for the called variant constructing the alternative genome $G_{alt}$. As described in the previous chapter, the probabilities of all read $r$ and genome segment ${g\in G}$ pairs, $P[r|g]$, are calculated and then further summed up to acquire $P[r|G]$. Although this is undoubtedly a straightforward solution, numerous time consuming operations were done in the above operation, looping over all possible pairs of $r$ and $g$. Not to mention that such process should be repeated for all called variants, each of them considering all reads that could map to related positions, twice for both $G_{ref}$ and the constructed $G_{alt}$. A brief pseudocode of the implementation demonstrating the looped structure is shown in \ref{alg:loop}.
+In the original EAGLE publication, for all called variants, a hypothesis: instead of being identical to the reference genome $G_{ref}$, the individual providing the sequenced reads possesses an alternative version of human genome $G_{alt}$ consisting the called variant, is considered. It is then compared with the default hypothesis: the read being sequenced from the reference genome. In order to assess how well the above two hypotheses fits the sequenced read data $r$, the likelihood, $P[r|G]$, for both $G_{ref}$ and $G_{alt}$ is measured. The ratio between the two would be obtained as the resulting quality score for the called variant constructing the alternative genome $G_{alt}$. As described in the previous chapter, the probabilities of all read $r$ and genome segment ${g\in G}$ pairs, $P[r|g]$, are calculated and then further summed up to acquire $P[r|G]$. Although this is undoubtedly a straightforward solution, numerous time consuming operations were done in the above operation, looping over all possible pairs of $r$ and $g$. Not to mention that such process should be repeated for all called variants, each of them considering all reads that could map to related positions, twice for both $G_{ref}$ and the constructed $G_{alt}$. A brief pseudocode of the implementation demonstrating the looped structure is shown in Algorithm \ref{alg:loop}.
 \begin{algorithm}
-	\caption{An algorithm with caption}
+	\caption{Pseudocode of the implementation without parallelism}
 	\label{alg:loop}
 	\begin{algorithmic}
 	% \Require $n \geq 0$
-	\For{each $v\in Called variants$}
-		\State $G_{ref}$ \gets reference genome segment near $v$
-		\State $G_{alt}$ \gets genome segment with $v$
-		\State $R$ \gets fetchReads() \Comment{Fetch reads overlapping the position of the variant and insert into read set R}
+	\For{each $v\in \texttt{Called variants}$}
+		\State $G_{ref} \gets \texttt{reference genome segment near } v$
+		\State $G_{alt} \gets \texttt{genome segment consisting } v$
+		\State $R \gets fetchReads()$ \Comment{Insert reads overlapping the position of $v$ into read set $R$}
 		\For{each $r\in R$}
-			\State $P[r|G_{ref}]$ \gets 0
-			\State $P[r|G_{alt}]$ \gets 0
+			\State $P[r|G_{ref}] \gets 0$
+			\State $P[r|G_{alt}] \gets 0$
 			\For{each $g\in G_{ref}$}
-				\State $refProbability$ \gets 1
-				\For{$i=1$ to $\ellr$}
-					\State $refProbability$ \gets $refProbability$ * $P[r_i|g_i]$
+				\State $refProbability \gets 1$
+				\For{$i=1$ to $\ell_r$}
+					\State $refProbability \gets refProbability * P[r_i|g_i]$
 				\EndFor
-				\State $P[r|G_{ref}]$ \gets $P[r|G_{ref}]$ + $refProbability$
+				\State $P[r|G_{ref}] \gets P[r|G_{ref}] + refProbability$
 			\EndFor
 			\For{each $g\in G_{alt}$}
-				\State $altProbability$ \gets 1
-				\For{$i=1$ to $\ellr$}
-					\State $altProbability$ \gets $altProbability$ * $P[r_i|g_i]$
+				\State $altProbability \gets 1$
+				\For{$i=1$ to $\ell_r$}
+					\State $altProbability \gets altProbability * P[r_i|g_i]$
 				\EndFor
-				\State $P[r|G_{alt}]$ \gets $P[r|G_{alt}]$ + $altProbability$
+				\State $P[r|G_{alt}] \gets P[r|G_{alt}] + altProbability$
 			\EndFor
 		\EndFor
 	\EndFor
 	\end{algorithmic}
 \end{algorithm}
-Apparently, computing the likelihood ratio for all called variants is time expensive when massive data is to be processed. Coming as a relief, on the other hand, it is also obvious that the computation of $P[r|G]$ with different pairs of $r$ and $G$ (either $G_{ref}$ or $G_{alt}$), is independent with each other, enabling us to process them in parallel without worrying the orders they were computed. Here, we would like to take advantage of the high parallel graphics processing units and try to distribute the subtasks of computing $P[r|G_{ref}]$ and $P[r|G_{alt}]$, for every read-genome segment pair, to a separate GPU thread. Such process is visualized in Figure \ref{fig:overview}, where our goal is to parallelize the parts circled, with the attempt to reduce the total amount of time required to execute the program. We will go through the details of what a thread is responsible for in the following section.
+Apparently, computing the likelihood ratio for all called variants is time expensive when massive data is to be processed. Coming as a relief on the other hand, it is also obvious that the computation of $P[r|G]$ with different pairs of $r$ and $G$ (either $G_{ref}$ or $G_{alt}$), is independent with each other, enabling us to process them in parallel without worrying the orders they were computed. Here, we would like to take advantage of the high parallel graphics processing units and try to distribute the subtasks of computing $P[r|G_{ref}]$ and $P[r|G_{alt}]$, for every read-genome segment pair, to a separate GPU thread. Such process is visualized in Figure \ref{fig:overview}, where our goal is to parallelize the parts circled, with the attempt to reduce the total amount of time required to execute the program. We will go through the details of what a thread is responsible for in the following section.
 
 \begin{figure}
 	\centering
