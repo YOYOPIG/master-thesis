@@ -1,5 +1,6 @@
 \documentclass{PHlab-thesis}
 \usepackage{amsmath}
+\usepackage{amsfonts} 
 \usepackage{graphicx}
 \usepackage{algpseudocode}
 \usepackage{algorithm}
@@ -224,7 +225,7 @@ First of all, for any given pair of genome segment $g$ and sequence read $r$ hav
 \begin{equation}
 	P[g|r] = \prod_{i=1}^{\ell_r} P[g_i|r_i]
 \end{equation}
-Since the likelihood of each base pair $(g_i, r_i)$ being a match/mismatch is independent to that of other base pairs, they can be computed concurrently. This provides us the opportunity to accelerate this process by computing them in parallel, where the maximum number of operations that can be done in parallel is bounded by the minimum value of: (1) length of the read $r$, or (2) the number of threads. Considering NGS read data, which is often around 100 to 150 base pairs in terms of read length, we can easily load the entire read onto the GPU and allocate a thread for each base, since the size is rather small in comparison to the memory capacity and the core counts of modern GPUs. That is, the $i$th thread being responsible for $P[g_i|r_i]$, for all $i \in \N , 1 \leq i \leq {\ell_r}$. On the other hand, if we take other sequencing technologies which might produce reads longer than the total amount of threads available into consideration, we can achieve similar result by letting the $i$th thread compute $P[g_{i+j}|r_{i+j}]$, for all $i \in \N ,1 \leq i \leq T$ and $j \in \Z ,0 \leq j, i+j \leq {\ell_r}$, with $T$ denoting the total amount of threads. A schematic diagram for such process is shown in Figure \ref{fig:prg}.
+Since the likelihood of each base pair $(g_i, r_i)$ being a match/mismatch is independent to that of other base pairs, they can be computed concurrently. This provides us the opportunity to accelerate this process by computing them in parallel, where the maximum number of operations that can be done in parallel is bounded by the minimum value of: (1) length of the read $r$, or (2) the number of threads. Considering NGS read data, which is often around 100 to 150 base pairs in terms of read length, we can easily load the entire read onto the GPU and allocate a thread for each base, since the size is rather small in comparison to the memory capacity and the core counts of modern GPUs. That is, the $i$th thread being responsible for $P[g_i|r_i]$, for all $i \in \mathbb{N} , 1 \leq i \leq {\ell_r}$. On the other hand, if we take other sequencing technologies which might produce reads longer than the total amount of threads available into consideration, we can achieve similar result by letting the $i$th thread compute $P[g_{i+j}|r_{i+j}]$, for all $i \in \mathbb{N} ,1 \leq i \leq T$ and $j \in \mathbb{Z} ,0 \leq j, i+j \leq {\ell_r}$, with $T$ denoting the total amount of threads. A schematic diagram for such process is shown in Figure \ref{fig:prg}.
 \begin{figure}
 	\centering
 	\includegraphics[scale=0.3]{figures/method1.png}
