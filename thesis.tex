@@ -116,7 +116,7 @@ Critical concepts of the previous work EAGLE would be recapitulated in this sect
 \begin{equation}
 P[r|G] = \sum_{g\in G} P[g|G] P[r|g]
 \end{equation}
-where $P[g|G]$ is the probability that genome sequence segment $g$ is sequenced, with respect to that some segment from $G$ is sequenced. In the original work, two assumptions were made here. Firstly, uniform priors were assumed on genome segments $g$ to be in any particular length. Secondly, to acquire the probability that the genome segment were having the same length as the read, available for further computation, the length distribution of $g$ is assumed to follow the general prior defined as $\mathcal{L}(\ell)$. Which is, in mathematical equation,
+where $P[g|G]$ marks the probability of a certain genome segment $g$ being sequenced, with respect to that some segment from $G$ is sequenced. In the original work, two assumptions were made here. Firstly, uniform priors were assumed on genome segments $g$ to be in any particular length. Secondly, to acquire the probability that the genome segment were having the same length as the read, available for further computation, the length distribution of $g$ is assumed to follow the general prior defined as $\mathcal{L}(\ell)$. Which is, in mathematical equation,
 %%
 \begin{equation}
 P[g|G] = \mathcal{L}(\ell_g) \frac{1}{n_{\ell_g}}
