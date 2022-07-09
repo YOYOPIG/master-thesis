@@ -26,10 +26,10 @@
 \ifdefined\optHyperlinks
 \RequirePackage[hyperfootnotes=false]{hyperref}
 \hypersetup{colorlinks,citecolor=blue,filecolor=blue,linkcolor=blue,urlcolor=blue}
-\RequirePackage[hyperref=true]{biblatex}
+\RequirePackage[sorting=none,hyperref=true]{biblatex}
 \else
 \RequirePackage[draft,hyperfootnotes=false]{hyperref}
-\RequirePackage[hyperref=false]{biblatex}
+\RequirePackage[sorting=none,hyperref=false]{biblatex}
 \fi
 
 \renewbibmacro{in:}{}
