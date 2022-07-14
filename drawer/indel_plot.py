@@ -4,8 +4,9 @@ import numpy as np
 name_dict = {'1': 1, '32': 2, '64': 3, '128': 4, '256': 5}
 threads = [1, 2, 3, 4, 5]
 # threads = [1, 32, 64, 128, 256]
-cpu = [1, 1]
-gpu = [0.203837/0.342212, 0.026067/0.013313]
+gpu = [0.342212, 0.013313]
+# gpu = [0.203837/0.342212, 0.026067/0.013313]
+cpu = [0.203837, 0.026067]
 
 X_axis = np.arange(len(cpu))
 
@@ -21,6 +22,6 @@ ax = plt.gca()
 plt.xticks(X_axis, [0,1])
 
 plt.legend()
-plt.ylabel('speedup')
+plt.ylabel('Time (hr)')
 plt.xlabel('Threshold')
 plt.show()
