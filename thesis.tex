@@ -157,23 +157,23 @@ In the original EAGLE publication, for all called variants, a hypothesis: instea
 	\For{each $v\in \texttt{Called variants}$}
 		\State $G_{ref} \gets \texttt{reference genome segment near } v$
 		\State $G_{alt} \gets \texttt{genome segment consisting } v$
-		\State $R \gets fetchReads()$ \Comment{Insert reads overlapping the position of $v$ into read set $R$}
+		\State $R \gets \mathsf{fetchReads}()$ \Comment{Insert reads overlapping the position of $v$ into read set $R$}
 		\For{each $r\in R$}
 			\State $P[r|G_{ref}] \gets 0$
 			\State $P[r|G_{alt}] \gets 0$
 			\For{each $g\in G_{ref}$}
-				\State $refProbability \gets 1$
+				\State $\mathsf{refProbability} \gets 1$
 				\For{$i=1$ to $\ell_r$}
-					\State $refProbability \gets refProbability * P[r_i|g_i]$
+					\State $\mathsf{refProbability} \gets \mathsf{refProbability} \times P[r_i|g_i]$
 				\EndFor
-				\State $P[r|G_{ref}] \gets P[r|G_{ref}] + refProbability$
+				\State $P[r|G_{ref}] \gets P[r|G_{ref}] + \mathsf{refProbability}$
 			\EndFor
 			\For{each $g\in G_{alt}$}
-				\State $altProbability \gets 1$
+				\State $\mathsf{altProbability} \gets 1$
 				\For{$i=1$ to $\ell_r$}
-					\State $altProbability \gets altProbability * P[r_i|g_i]$
+					\State $\mathsf{altProbability} \gets \mathsf{altProbability} \times P[r_i|g_i]$
 				\EndFor
-				\State $P[r|G_{alt}] \gets P[r|G_{alt}] + altProbability$
+				\State $P[r|G_{alt}] \gets P[r|G_{alt}] + \mathsf{altProbability}$
 			\EndFor
 		\EndFor
 	\EndFor
@@ -199,7 +199,7 @@ Before diving into the implementation details right away, we should first cautio
 	\For{each $v\in \texttt{Called variants}$}
 		\State $G_{ref} \gets \texttt{reference genome segment near } v$
 		\State $G_{alt} \gets \texttt{genome segment consisting } v$
-		\State $R \gets fetchReads()$ \Comment{Insert reads overlapping the position of $v$ into read set $R$}
+		\State $R \gets \mathsf{fetchReads}()$ \Comment{Insert reads overlapping the position of $v$ into read set $R$}
 		\For{each $r\in R$}
 			\State $\texttt{allocateDeviceMemory()}$
 			\State $\texttt{memoryCopyHostToDevice()}$
@@ -331,7 +331,7 @@ The execution time dramatically increases when read indels are taken into consid
 Trying to investigate various possibilities of application for GPU to improve the performance, this paper provides the implementations of the general usage functions in CUDA. Unlike programs executed particularly on CPU, the design of GPU kernels often require extra attention, including memory copying schema and the detail implementation of algorithms to avoid warp divergence. If we purely consider datasets with shorter sequencing reads, the extent of parallelism could be further increased by computing different read sets concurrently. With a specific kernel for each case, warp divergence could be eliminated. Theoretically, this could benefit cases when the dataset consist of large amount of read sets, enormously reducing the amount of time to evaluate the likelihood by computing the results for each set all at once. Another possible optimization would be lessening the memory copying cost. Despite it not being the bottleneck of the program, some advanced techniques could be applied to lower the amount of data copied between the host CPU and the device even more. For example, if we are targeting only DNA and RNA sequences but not proteins, we could easily represent the bases, A, C, G, T(U for RNA), N, in 3 bits. Thus, instead of copying them as characters, they could be encoded first, enabling us to pack 2 bases into one unsigned integer. This is a common trick among sequencing related GPU applications, also adopted by other tools such as GASAL2~\cite{ahmed2019gasal2} and NVBIO~\cite{nvbio2015}.
 
 \chapter{Conclusion}
-In this paper, we propose and implemented a GPU accelerated version of EAGLE, a previously proposed method for alternative genome likelihood evaluation. GPU-EAGLE utilizes the massively parallel architecture of modern GPUs, enabling instructions to be executed in parallel on multiple different data. This prepares the original method for the continuous growth when it comes to the size of sequencing data. Besides, we also investigated the feasibility of taking sequencing read indel errors into consideration, which is computational expensive and used to be ignored, after increasing the program throughput by applying parallel computation. We provide experimental results showing that GPU-EAGLE outperforms the CPU version when the data size is large enough, and conclude that designing a specialized GPU kernel could always be an option for forthcoming applications with excessive computational operations.
+In this paper, we propose and implemented a GPU accelerated version of EAGLE, a previously proposed method for alternative genome likelihood evaluation. GPU-EAGLE utilizes the massively parallel architecture of modern GPUs, enabling instructions to be executed in parallel on multiple different data. This prepares the original method for the continuous growth when it comes to the size of sequencing data. Besides, we also investigated the feasibility of taking sequencing read indel errors into consideration, which is computational expensive and used to be ignored, after increasing the program throughput by applying parallel computation. We provide experimental results showing that GPU-EAGLE outperforms the CPU version when the data size is large enough, and conclude that designing a specialized GPU kernel may be an option for forthcoming applications with excessive computational operations.
 
 \newpage
 \AddToContents{Bibliography}
