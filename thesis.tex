@@ -26,17 +26,17 @@
 %% \newcommand*\CoAdvisorB中文{}
 %% \newcommand*\CoAdvisorB英文{}
 
-
 \newcommand*\YearMonth英文{July, 2022}
 \newcommand*\YearMonth中文{１１１年７月}
+
+\hyphenpenalty=1024
 
 \pagestyle{fancy}
 \begin{document}
 
 
 \newcommand*\Keywords英文{genomics, variant calling, GPU acceleration}
-\newcommand*\Abstract英文{
-Variant calling remains to play an important role in analyzing genome sequence data. A variety of studies have been conducted in the related field, proposing solutions to this specific task. The predecessor of this study, EAGLE: Explicit Alternative Genome Likelihood Evaluator, aimed to further improve the precision of the results of those, by assessing the likelihood of the called variants. It was shown that such technique assuredly enhance the accuracy. However, because of the computational complexity of its algorithm, the amount of time required to execute intensifies as the length of sequenced reads grow. Besides, such issue also acts as an obstacle when building more advanced applications on top of it. In this research, we would like to investigate if graphics processing units, or GPUs, could accelerate the process since the algorithm is highly parallel. Here, we propose EAGLE-GPU, a revision of the original method by rewriting the fundamental computing functions as GPU CUDA kernels. The experimental outcomes demonstrate that although the current usage of GPU parallelism might not be suitable for sequencing data with shorter reads, it is beneficial when the read lengths grow, opening up opportunities for the third generation sequencing. In addition, our work enables more complicated applications to establish on top with, due to the reduced time for the computational excessive operations. To conclude, we recommend applying GPU acceleration if encountering a highly parallel dataset with long reads, and that more specialized CUDA kernels could be designed base on our results for future complex problems.
+\newcommand*\Abstract英文{Variant calling plays an important role in analyzing genome sequence data. A variety of studies have been conducted in the related field, proposing solutions to this specific task. The predecessor of this study, EAGLE: Explicit Alternative Genome Likelihood Evaluator, aimed to further improve the precision of the results of those, by assessing the likelihood of the called variants.  It was shown that such technique enhance accuracy. However, because of the computational complexity of its algorithm, the amount of time required to execute intensifies as the length of sequenced reads grow.  Also the running time may act as an obstacle when building more advanced applications on top of EAGLE.  In this research, investigated if graphics processing units, or GPUs, could accelerate the process; since the computation is highly parallel. Here, we propose EAGLE-GPU, a revision of the original method rewriting the fundamental computing functions as GPU CUDA kernels.  Our experimental outcomes demonstrate that although the current usage of GPU parallelism might not be suitable for sequencing data with shorter reads, it is beneficial when the read lengths grow, opening up opportunities for the third generation sequencing. In addition, our work enables more complicated applications to be establish on top of that, enabled by the reduced time for the computationally intense operations.  In conclusion, we recommend applying GPU acceleration when encountering a highly parallel computation to be applied to a dataset with long reads, and that more specialized CUDA kernels could be designed based on our results for future complex problems.
 }
 
 
